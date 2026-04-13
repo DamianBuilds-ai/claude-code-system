@@ -1,22 +1,22 @@
-# Example: Building a Clients Domain from Scratch
+# Building a Clients Domain from Scratch
 
-This walkthrough shows the full lifecycle of setting up a new domain, from first files to a working multi-session workflow. The domain used here is "Clients" - a common starting point for freelancers and consultants.
+This is what it actually looks like to set up a domain from zero - files, slash command, first session, the disciplines that make it stick. I'm using "Clients" because it's the most common starting point for freelancers and consultants, but the pattern is identical for any domain you build.
 
-**Time to complete:** About 30 minutes for setup, then it runs itself.
-
----
-
-## Step 1: Decide on the Domain
-
-Before creating any files, answer two questions:
-
-1. **What does this domain cover?** Be specific. "Clients" means: tracking leads, sending proposals, managing active projects, following up. It does NOT mean: invoicing (that's Finances), or social media outreach to attract clients (that's Marketing). Clear boundaries matter.
-
-2. **What's the single most common task you'll do here?** For Clients, it's probably drafting and sending proposals. Design the domain around that task.
+Set aside about 30 minutes for the initial setup. After that, it mostly runs itself.
 
 ---
 
-## Step 2: Create the Files
+## Step 1: Define the domain before touching any files
+
+Two questions before you create anything:
+
+**What does this domain actually cover?** Be specific about where it starts and stops. For Clients: tracking leads, sending proposals, managing active projects, following up. NOT invoicing (that's Finances) and NOT social media outreach to attract clients (that's Marketing). Clear edges matter because the AI will stay inside them.
+
+**What's the single most common task you'll do here?** For Clients, it's probably drafting and sending proposals. Design the domain around that task first.
+
+---
+
+## Step 2: Create the files
 
 ```bash
 cd ~/my-system
@@ -25,9 +25,9 @@ touch CLIENTS_QUEUE.md
 touch CLIENTS.md
 touch CLIENTS_LOG.md
 touch CLIENTS_HANDOFF.md
-```
+```bash
 
-Start with the Queue. Fill it in before anything else.
+Fill in the Queue first. Everything else comes after.
 
 ---
 
@@ -64,13 +64,13 @@ Next: check in, then draft proposal for the new inquiry from [name].
 ## Recently Completed
 - 2026-04-08: Sent proposal to [Lead X]
 - 2026-04-07: Discovery call with [Lead X] - went well
-```
+```markdown
 
-The Queue is now the source of truth for this domain. You'll update it every session.
+The Queue is now the source of truth for this domain. Claude reads it first every session. You update it every session. It's the one file that has to stay current.
 
 ---
 
-## Step 4: Fill in the Reference Doc
+## Step 4: Fill in the Reference doc
 
 The Reference doc holds stable background knowledge - things that don't change session to session.
 
@@ -121,13 +121,13 @@ Average project length: [range].
 - Never start work without a signed contract and deposit
 - All client communication tracked in [CRM name]
 - Proposals valid for 14 days
-```
+```markdown
 
 ---
 
-## Step 5: Create the Slash Command
+## Step 5: Create the slash command
 
-Create the file `.claude/commands/clients.md` in your project:
+Create `.claude/commands/clients.md` in your project:
 
 ```bash
 mkdir -p .claude/commands
@@ -157,25 +157,25 @@ You are helping me manage my client relationships and business development.
 - Closing out completed projects
 
 ARGUMENTS: $ARGUMENTS
-```
+```markdown
 
-Now type `/clients` in Claude Code to start a session with full context automatically loaded.
+Type `/clients` in Claude Code to start a session with full context loaded automatically.
 
 ---
 
-## Step 6: Run Your First Session
+## Step 6: Run your first session
 
 Open Claude Code in your project directory and type:
 
-```
+```text
 /clients
 ```
 
-Claude will read your Queue and Handoff (empty for now), then report back: "Here's what's active, here's what's next."
+Claude will read your Queue and Handoff (empty for now), then report back on what's active and what's next.
 
-For your first session, the work might look like:
+A first session might look like this:
 
-```
+```text
 You: /clients
 
 Claude: [reads Queue, sees 2 active clients and 2 outstanding proposals]
@@ -192,27 +192,27 @@ You: Good. Mark that task done and wrap up.
 Claude: [updates Queue - checks off "follow up with Lead X"]
         [writes Handoff with what was done]
         Done. Follow-up drafted and Queue updated.
-```
+```text
 
-That's one session. The next time you type `/clients`, Claude will read the Handoff and know exactly what happened.
-
----
-
-## Step 7: The Discipline (What Makes It Work)
-
-After two weeks of using this pattern, a few habits make the difference between a system that works and one that breaks down:
-
-**Always start with the slash command.** Typing `/clients` instead of "hey help me with a client thing" ensures Claude loads the right files first. Without this, you'll spend the first 5 minutes re-explaining context.
-
-**Update the Queue before ending the session.** If you skip this once, the next session starts with stale information. The discipline is: don't close the tab until Queue and Handoff are updated.
-
-**Keep the Quick Resume current.** The 2-3 sentences at the top of the Queue are what the next session sees first. Make them accurate. If the situation changed this session, update them.
-
-**Use the Log for rotation, not deletion.** When "Recently Completed" in the Queue has 5+ items, move the oldest to the Log. Don't just delete them - the history is valuable.
+That's one session. The next time you type `/clients`, Claude reads the Handoff and knows exactly what happened.
 
 ---
 
-## Step 8: Adding a Leaf When the Domain Grows
+## Step 7: The habits that make it actually work
+
+After two weeks of using this pattern, a few disciplines make the difference between a system that holds and one that quietly falls apart:
+
+**Always start with the slash command.** `/clients` instead of "hey help me with a client thing." Without it, Claude starts cold and you spend the first five minutes re-explaining context you've already written down.
+
+**Update the Queue before ending the session.** Skip this once and the next session starts with stale information. The rule is simple: don't close the tab until Queue and Handoff are updated.
+
+**Keep the Quick Resume current.** The 2-3 sentences at the top of the Queue are what the next session sees first. If the situation changed this session, those sentences need to change too.
+
+**Use the Log for rotation, not deletion.** When "Recently Completed" has 5+ items, move the oldest to the Log. Don't delete them - the history is useful, and you'll be surprised how often you want to look back.
+
+---
+
+## Step 8: Adding a leaf when the domain grows
 
 After a few months, you might find the Reference doc is getting long. Suppose your proposal templates, counter-argument scripts, and pricing tiers have grown to 200 lines. Extract them:
 
@@ -228,7 +228,7 @@ Move the proposal-related content there. Update `CLIENTS.md` to point to it:
 | File | Contents |
 |------|---------|
 | CLIENTS_PROPOSALS.md | Proposal templates, pricing tiers, objection handling |
-```
+```markdown
 
 Update the slash command to mention the leaf:
 
@@ -238,37 +238,37 @@ Update the slash command to mention the leaf:
 2. Read `CLIENTS_HANDOFF.md`.
 3. Read `CLIENTS.md` only if you need deeper context.
 4. Read `CLIENTS_PROPOSALS.md` only when drafting or reviewing proposals.
-```
+```markdown
 
 The leaf loads on demand. Sessions that don't touch proposals never load it - context is preserved.
 
 ---
 
-## What the System Looks Like After 3 Months
+## What this looks like after 3 months
 
-```
+```text
 CLIENTS.md                     (stable: processes, pricing, tools)
 CLIENTS_QUEUE.md               (changes every session: tasks, quick resume)
 CLIENTS_LOG.md                 (grows over time: completed work history)
 CLIENTS_HANDOFF.md             (updated each session: relay baton)
 CLIENTS_PROPOSALS.md           (leaf: grows when you add new templates)
 .claude/commands/clients.md    (slash command: evolves as the domain does)
-```
+```text
 
-Six files, one domain, full persistent AI assistance. Every session picks up exactly where the last one left off. The AI knows your processes, your clients, your rules, and what's currently in flight - because it reads the files, not your memory.
+Six files, one domain, full persistent AI assistance. Every session picks up exactly where the last one left off. Claude knows your processes, your clients, your rules, and what's currently in flight - because it reads the files, not your memory.
 
 ---
 
-## Troubleshooting This Domain
+## When things go wrong
 
 **"Claude keeps asking me to clarify basic things about my business."**
-Add them to the Reference doc. Every question Claude asks you that it should already know is a signal that something belongs in `CLIENTS.md`.
+Add them to the Reference doc. Every question Claude asks that it should already know is a signal that something belongs in `CLIENTS.md`.
 
 **"The Queue is getting too long."**
 Split into two domains (e.g., `ACTIVE_PROJECTS` and `BUSINESS_DEVELOPMENT`), or clean up by moving completed items to the Log and dropping tasks you're no longer pursuing.
 
 **"I forgot to write the Handoff for the last session."**
-Write it now from memory. A late Handoff beats no Handoff. The rule is: never skip it going forward.
+Write it now from memory. A late Handoff beats no Handoff. Don't skip it going forward.
 
 **"I have a client situation that's too sensitive to put in files."**
-Use a private git repo. Or keep the sensitive fields vague (use a code name or initials). The system works with whatever level of detail you're comfortable committing to disk.
+Use a private git repo. Or keep the sensitive fields vague - code names, initials, whatever level of detail you're comfortable committing to disk. The system works with whatever you give it.

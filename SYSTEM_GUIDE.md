@@ -1,46 +1,49 @@
 # Claude Code: From Tool to System
 
-> A phased guide to building AI-powered business and life infrastructure.
-> You've been using Claude Code to build things. This guide teaches you to build *with* it - a persistent, evolving system that remembers, delegates, and grows.
+I spent the first few months using Claude Code the same way most people do - open a session, ask for something, close the tab, repeat. It worked. It was fine. But every new session started from zero.
+
+This guide is about fixing that. Not by hacking Claude's memory, but by building the infrastructure around it so that sessions become interchangeable. The AI changes. The files stay.
+
+These five phases are how I built that infrastructure for myself. You won't need all of them on day one. But they compound, so don't skip ahead.
 
 ---
 
-## How to Use This Guide
+## How to use this guide
 
-This guide is structured in five phases. Each one builds on the last. Don't skip ahead - the concepts compound.
+Read sequentially. Work one phase until it's solid before moving to the next. The phases reference each other and the concepts build.
 
-| Phase | What You Build | Timeline |
-|-------|---------------|----------|
+| Phase | What you build | When |
+|-------|---------------|------|
 | 1. Foundation | Your CLAUDE.md, first rules, the mental shift | Day 1 |
 | 2. First Domain | The 3-file system, a slash command, handoffs | Week 1 |
-| 3. Tools and Connections | MCP servers, n8n integration, agents, hooks | Week 2 |
+| 3. Tools and Connections | MCP servers, n8n, agents, hooks | Week 2 |
 | 4. Multi-Domain | Domain isolation, the forest architecture | Month 1 |
 | 5. Automation | Git versioning, scheduling, monitoring | Month 2+ |
 
-**Case study throughout:** This guide references a real working system called Oxide - 20+ domains managing business, finances, health, content, gaming, and infrastructure through Claude Code. You won't build that on day one. But every piece of it started with Phase 1.
+**Real-world case study:** Throughout this guide I'll reference a system called Oxide - 20+ domains managing business, finances, health, content, gaming, and infrastructure through Claude Code. I built it over roughly nine months. You won't build that on day one, but every piece of Oxide started with Phase 1.
 
 ---
 
 # Phase 1: The Foundation
 
-## The Mental Shift
+## The mental shift
 
-You've been using Claude Code as a coding assistant. You ask it to build a website, fix a bug, write a function. It does the work, you close the session, done.
+Here's the thing nobody explains when you start using Claude Code seriously: sessions are stateless. When you close one, the AI forgets everything. Decisions, context, what was in progress, what failed - gone. You start over.
 
-Here's the problem: every time you start a new session, Claude has no memory of the last one. It doesn't know what you decided yesterday, what's in progress, what failed. You start from scratch every time.
+The way out of this isn't better prompting. It's a different mental model.
 
-**The shift:** Instead of treating Claude Code as a tool you talk to, treat it as a system that reads and writes files. The files become the memory. The AI becomes the engine that processes them.
+Instead of treating Claude Code as something you talk to, treat it as a system that reads and writes files. The files hold the state. The AI is the engine that processes them.
 
-```
+```text
 Before: You <-> Claude (conversation dies when session ends)
 After:  You <-> Claude <-> Files (files persist, sessions are temporary)
 ```
 
-This is the core insight everything else builds on. Sessions are ephemeral. Files are permanent. Build your system in files, and every session picks up where the last one left off.
+This one shift is what everything else builds on. Sessions are ephemeral. Files are permanent. Build your system in files, and every session picks up exactly where the last one left off.
 
-## CLAUDE.md - Your System's Operating Manual
+## CLAUDE.md - your system's operating manual
 
-When Claude Code starts in a project directory, it automatically reads a file called `CLAUDE.md` in the project root. This file contains instructions that shape how Claude behaves in every session.
+When Claude Code starts in a project directory, it automatically reads a file called `CLAUDE.md` in the project root. Whatever's in there shapes how Claude behaves in every session.
 
 Think of it as the constitution of your system. Every session reads it. Every session follows it.
 
@@ -53,7 +56,7 @@ Think of it as the constitution of your system. Every session reads it. Every se
 
 Start with one `CLAUDE.md` in your project root. You can add a global one later.
 
-## Your First CLAUDE.md
+## Your first CLAUDE.md
 
 Create a new directory for your system. This is where everything will live.
 
@@ -91,11 +94,11 @@ I know [your background - e.g., intermediate coding, familiar with n8n].
 | `~/my-system/` | Project root |
 ```
 
-That's it for now. It's small. It will grow. Every rule you add should come from experience - you'll discover what Claude needs to be told as you work with it.
+That's it for now. Keep it small. It will grow. Every rule you add should come from actual experience - you'll discover what Claude needs to be told as you work with it. The CLAUDE.md I run now is several hundred lines. None of that was written upfront.
 
-**Key principle:** CLAUDE.md grows organically. Don't try to write the perfect one upfront. Add rules when Claude does something you don't want, or misses something you expected. Each rule is a lesson learned.
+**The principle:** CLAUDE.md grows organically. Don't write the perfect one upfront. Add rules when Claude does something you don't want, or misses something you expected. Each rule is a lesson learned.
 
-## How Claude Code Reads Your System
+## How Claude Code reads your system
 
 Claude Code has built-in tools for interacting with your filesystem:
 
@@ -108,23 +111,23 @@ Claude Code has built-in tools for interacting with your filesystem:
 | **Grep** | Searches file contents |
 | **Bash** | Runs shell commands |
 
-When you tell Claude to "check my queue" or "update the task list," it uses these tools to read and write your markdown files. You don't need to manage this - just know that Claude interacts with your files the same way you would, just faster.
+When you tell Claude to "check my queue" or "update the task list," it uses these tools to read and write your markdown files. You don't manage this directly - just know that Claude interacts with your files the same way you would, just faster.
 
-## Settings and Permissions
+## Settings and permissions
 
 Claude Code has a settings file that controls permissions and connected tools:
 
-```
+```text
 ~/.claude/settings.json      # Global settings (all projects)
 .claude/settings.json         # Project settings (git-tracked)
 .claude/settings.local.json   # Project settings (git-ignored, for secrets)
 ```
 
-You'll configure these more in Phase 3 when you add MCP servers. For now, the defaults work fine. Claude will ask permission before running commands - you can allow or deny each one.
+You'll configure these more in Phase 3 when you add MCP servers. For now, the defaults work fine. Claude will ask permission before running commands.
 
 **Tip:** When Claude asks to run a tool and you trust it, you can allow it for the session or permanently. Start conservative - allow per-session until you're comfortable, then set permanent allows for tools you use constantly.
 
-## Why Files Are Memory
+## Why files are memory
 
 This deserves emphasis because it's the foundation of everything that follows.
 
@@ -134,13 +137,13 @@ Claude Code sessions are stateless. When you close a session, the AI forgets eve
 - **Progress** gets tracked in files, not just remembered
 - **Context** gets stored in files, not just explained
 
-Every Phase after this builds on this principle. The 3-file system (Phase 2) is a pattern for organising what to remember. Handoffs (Phase 2) are a pattern for session continuity. Slash commands (Phase 2) are a pattern for loading the right context. All of it is files.
+Every phase after this builds on this principle. The 3-file system (Phase 2) is a pattern for organising what to remember. Handoffs (Phase 2) are a pattern for session continuity. Slash commands (Phase 2) are a pattern for loading the right context. All of it is files.
 
 ---
 
 # Phase 2: Your First Domain
 
-## What Is a Domain?
+## What is a domain?
 
 A domain is an area of responsibility - a distinct part of your business or life that has its own context, tasks, and history.
 
@@ -154,7 +157,7 @@ Examples:
 
 Start with ONE domain. The one that will benefit most from persistent AI assistance. For most people starting with business automation, that's their core business operations.
 
-## The 3-File Pattern
+## The 3-file pattern
 
 Every domain uses three files:
 
@@ -278,7 +281,7 @@ The relay baton. Written at the end of every session. Read at the start of the n
 - Client asked about rush pricing - need to decide on policy
 ```
 
-## Building Your First Domain
+## Building your first domain
 
 Here's the practical exercise. Create your first domain:
 
@@ -310,13 +313,13 @@ Every domain has up to 4 files:
 5. Write the HANDOFF (what was done, what's in progress, what's blocked).
 ```
 
-## Slash Commands - Domain Entry Points
+## Slash commands - domain entry points
 
-Slash commands are custom prompts you can invoke with `/commandname`. They load specific context and instructions for Claude.
+Slash commands are custom prompts you invoke with `/commandname`. They load specific context and instructions for Claude.
 
 **Where they live:**
 
-```
+```text
 ~/.claude/commands/        # Available in all projects (user-level)
 .claude/commands/          # Available in this project only
 ```
@@ -354,9 +357,9 @@ ARGUMENTS: $ARGUMENTS
 
 Now when you type `/business` in Claude Code, it loads this context automatically. You can also pass arguments: `/business draft a proposal for the new client` and `$ARGUMENTS` gets replaced with "draft a proposal for the new client."
 
-**Why this matters:** Without slash commands, you'd explain context every session. With them, you type `/business` and Claude already knows what to read, how to behave, and what you're working on.
+**Why this matters:** Without slash commands, you explain context every session. With them, you type `/business` and Claude already knows what to read, how to behave, and what you're working on. That time-to-productive goes from 5 minutes to about 30 seconds.
 
-## The Handoff System
+## The handoff system
 
 Each Claude Code session has no memory of previous ones. The Handoff file is the bridge.
 
@@ -368,7 +371,7 @@ Each Claude Code session has no memory of previous ones. The Handoff file is the
 1. Read the Queue (what am I working on?)
 2. Read the Handoff (what happened last time?)
 
-This creates continuity. The next session picks up exactly where you left off. Like a relay runner passing the baton - the runner changes, but the race continues.
+This creates continuity. The next session picks up exactly where you left off - like a relay runner passing the baton. The runner changes, but the race continues.
 
 **Add this to your CLAUDE.md:**
 
@@ -380,7 +383,7 @@ When I say "wrap up":
 3. Confirm what was saved
 ```
 
-## Session Discipline
+## Session discipline
 
 The system only works if you follow the discipline:
 
@@ -389,13 +392,13 @@ The system only works if you follow the discipline:
 3. **Work one task at a time.** Finish and check off before starting the next.
 4. **Wrap up properly.** Never close a session without updating Queue and Handoff.
 
-This feels rigid at first. Within a week it becomes automatic. And the payoff is enormous - every session is productive from minute one because the context is already loaded.
+This feels rigid at first. Within a week it becomes automatic. And the payoff is real - every session is productive from minute one because the context is already there.
 
 ---
 
 # Phase 3: Tools and Connections
 
-## MCP Servers - Connecting External Tools
+## MCP servers - connecting external tools
 
 MCP (Model Context Protocol) servers let Claude Code interact with external services directly. Instead of you copy-pasting data between tools, Claude can read from and write to them.
 
@@ -408,7 +411,7 @@ MCP (Model Context Protocol) servers let Claude Code interact with external serv
 
 Add MCP servers to your settings file. The location depends on scope:
 
-```
+```text
 ~/.claude/settings.json           # Available in all projects
 .claude/settings.json             # This project only
 .claude/settings.local.json       # This project, not tracked by git (use for secrets)
@@ -430,15 +433,15 @@ Example structure:
 }
 ```
 
-Each MCP server gives Claude a set of tools. Once configured, Claude can use them like its built-in tools (Read, Write, Bash, etc.).
+Each MCP server gives Claude a set of tools. Once configured, Claude uses them like its built-in tools (Read, Write, Bash, etc.).
 
-## n8n Integration
+## n8n integration
 
-If you use n8n for workflow automation, this is where things get powerful. The n8n MCP server lets Claude Code manage your workflows directly.
+If you use n8n for workflow automation, this is where things get interesting. The n8n MCP server lets Claude Code manage your workflows directly.
 
-### Setting Up n8n MCP
+### Setting up n8n MCP
 
-First, install the `n8n-mcp` npm package globally:
+Install the `n8n-mcp` npm package globally:
 
 ```bash
 npm install -g n8n-mcp
@@ -459,7 +462,7 @@ Find the install path of the `dist/mcp/index.js` entry point (usually under your
 
 The package reads your n8n API key from `~/.api_keys` or environment variables, not from the MCP config. Check the [n8n-mcp README](https://www.npmjs.com/package/n8n-mcp) for the current auth approach.
 
-### What You Can Do With n8n From Claude Code
+### What you can do with n8n from Claude Code
 
 Once connected, Claude can:
 
@@ -474,7 +477,7 @@ Once connected, Claude can:
 
 **Example interactions:**
 
-```
+```text
 You: "Show me all my active workflows"
 Claude: [uses n8n MCP to list workflows, shows you the results]
 
@@ -485,7 +488,7 @@ You: "The email notification workflow isn't firing - debug it"
 Claude: [reads the workflow config, checks execution history, identifies the issue]
 ```
 
-### n8n Best Practices
+### n8n best practices
 
 Add these to your CLAUDE.md once you're working with n8n:
 
@@ -497,19 +500,19 @@ Add these to your CLAUDE.md once you're working with n8n:
 - Always confirm scope and check pricing before bulk API operations.
 ```
 
-**Why "never delete":** Workflows contain prompts, logic, and configuration that took time to build. Deactivating preserves them. Deleting loses them forever.
+**Why "never delete":** Workflows contain prompts, logic, and configuration that took time to build. Deactivating preserves them. Deleting loses them forever. I have workflows from months ago that I've come back to - you don't know what'll be useful later.
 
-## Agents - Delegating to Sub-Agents
+## Agents - delegating to sub-agents
 
-Claude Code can spawn sub-agents - separate Claude instances that work independently with their own context window. This is powerful for:
+Claude Code can spawn sub-agents - separate Claude instances that work independently with their own context window. Useful for:
 
 - **Parallel research** - multiple agents searching for different things simultaneously
 - **Keeping main context clean** - heavy file reading happens in the agent, not your conversation
-- **Different model routing** - use faster/cheaper models for simple tasks
+- **Different model routing** - faster, cheaper models for simple tasks
 
-### How Agents Work
+### How agents work
 
-```
+```text
 Your session (main context)
   |
   |-- Agent 1: "Search the codebase for all API endpoints" (fast model)
@@ -519,7 +522,7 @@ Your session (main context)
   Results come back as summaries into your main context
 ```
 
-Each agent gets its own context window. It does its work and returns a result. Your main session stays clean and focused.
+Each agent gets its own context window. It does its work and returns a result. Your main session stays clean.
 
 **When to use agents:**
 - Reading 3+ files (keeps the content out of your main context)
@@ -527,16 +530,16 @@ Each agent gets its own context window. It does its work and returns a result. Y
 - Parallel independent tasks
 - Work that doesn't need your input mid-way
 
-**When NOT to use agents:**
+**When not to use agents:**
 - Simple questions you can answer directly
 - Tasks that need back-and-forth with you
 - When you need to see every detail (agents summarise)
 
-### Agent Model Routing
+### Agent model routing
 
 Different tasks need different levels of intelligence:
 
-| Model | Use For | Cost/Speed |
+| Model | Use for | Cost/Speed |
 |-------|---------|-----------|
 | Haiku | Quick lookups, file discovery, simple searches | Fast, cheap |
 | Sonnet | Research, doc analysis, simple edits, code review | Balanced |
@@ -553,9 +556,9 @@ Different tasks need different levels of intelligence:
 - Always summarise agent results concisely. Don't parrot everything back.
 ```
 
-## Hooks - Automated Behaviours
+## Hooks - automated behaviours
 
-Hooks are shell commands that run automatically when certain events happen in Claude Code. They're configured in your settings file.
+Hooks are shell commands that run automatically when certain events happen in Claude Code. Configured in your settings file.
 
 **Example use cases:**
 - Run a linter after every file edit
@@ -584,7 +587,7 @@ Hooks are shell commands that run automatically when certain events happen in Cl
 }
 ```
 
-This example injects the current date and time into every prompt - useful because Claude doesn't inherently know what day it is.
+This example injects the current date and time into every prompt. Claude doesn't inherently know what day it is - this fixes that.
 
 **Hook events you can use:**
 
@@ -597,7 +600,7 @@ This example injects the current date and time into every prompt - useful becaus
 
 **Start simple.** A datetime hook is a good first hook. Add more as you discover repetitive checks you want automated.
 
-## Memory - Persistent Context Across Conversations
+## Memory - persistent context across conversations
 
 Claude Code has a built-in memory system that persists across conversations within a project. It stores memories in `~/.claude/projects/{project-path}/memory/`.
 
@@ -622,19 +625,19 @@ Memory is supplementary to your file system, not a replacement. Your Queue, Refe
 
 # Phase 4: Multi-Domain Architecture
 
-## When to Split Into Multiple Domains
+## When to split into multiple domains
 
-You started with one domain. At some point, you'll notice:
+You started with one domain. At some point you'll notice:
 - Your Queue file is getting cluttered with unrelated tasks
 - You're loading context you don't need for the current task
-- Different areas need different rules or tools
+- Different areas have different tools, different rules, different rhythms
 
 That's when you split.
 
 **Rule of thumb:** If two areas of work have different tools, different contexts, and different cadences, they're different domains.
 
 Example split:
-```
+```text
 Before: BUSINESS_QUEUE.md (contains everything)
 
 After:
@@ -645,11 +648,11 @@ After:
 
 **Don't split too early.** One cluttered domain is better than three empty ones. Split when the clutter actively slows you down.
 
-## Domain Isolation
+## Domain isolation
 
-Once you have multiple domains, you need isolation. Each domain should load only its own files - not everything.
+Once you have multiple domains, isolation matters. Each domain should load only its own files.
 
-**Why isolation matters:**
+**Why:**
 - **Context limits.** Claude has a context window. Loading all domains wastes it.
 - **Focus.** Irrelevant information leads to irrelevant suggestions.
 - **Speed.** Less to read means faster startup.
@@ -671,9 +674,9 @@ Cross-domain work: If the task spans multiple domains, read both.
 If unsure which domain: ASK. Don't explore multiple domains to figure it out.
 ```
 
-Each domain gets its own slash command too:
+Each domain gets its own slash command:
 
-```
+```text
 .claude/commands/clients.md
 .claude/commands/marketing.md
 .claude/commands/finances.md
@@ -681,11 +684,11 @@ Each domain gets its own slash command too:
 
 Each command tells Claude exactly which files to read and what rules to follow for that domain.
 
-## The Forest Architecture
+## The forest architecture
 
-As your system grows, it helps to have a mental model. Here's one that scales:
+As your system grows, it helps to have a mental model. Here's the one I use:
 
-```
+```text
 CLAUDE.md                          <- THE SOIL (always loaded, global rules)
   |
   |-- CLIENTS.md                   <- TRUNK (domain reference)
@@ -715,7 +718,7 @@ CLAUDE.md                          <- THE SOIL (always loaded, global rules)
 - Trunks can be longer but should stay under ~500 lines.
 - When you create a new leaf, update the trunk to point to it (so future sessions can find it).
 
-## Cross-Domain Communication
+## Cross-domain communication
 
 Sometimes one domain discovers something another domain needs to know. For example, your Marketing session discovers that a client mentioned in the Clients domain has gone quiet.
 
@@ -729,7 +732,7 @@ May need a check-in. See MARKETING_LOG.md 2026-04-10 for details.
 ```
 
 **Structured approach (scale to this):**
-As your system grows, you might want a shared knowledge table. The Oxide case study uses a database table (called Cortex) where any domain can write findings and any other domain can read them at startup. This is advanced - you'll know when you need it.
+As your system grows, you might want a shared knowledge table. The Oxide case study uses a database table called Cortex where any domain can write findings and any other domain can read them at startup. This is advanced - you'll know when you need it.
 
 **Add to CLAUDE.md when ready:**
 
@@ -778,7 +781,7 @@ Don't put domain-specific rules in CLAUDE.md. It should be lean enough that load
 
 # Phase 5: Automation and Infrastructure
 
-## Git for Versioning Your System
+## Git for versioning your system
 
 Your markdown files are your system's state. Git gives you:
 - **Version history** - see what changed and when
@@ -813,7 +816,7 @@ When I say "wrap up":
 - Add sensitive files to `.gitignore`
 - Use `.claude/settings.local.json` (git-ignored by default) for secrets
 
-## Server Setup (Optional but Powerful)
+## Server setup (optional but useful)
 
 Once your system works locally, you might want:
 - A server that runs n8n 24/7
@@ -826,7 +829,7 @@ Once your system works locally, you might want:
 - Git repo cloned on the server
 - File syncing (Syncthing, rsync) between your machine and the server
 
-**This is optional.** Many automation systems work perfectly fine running locally. Only add a server when you have workflows that need to run when your computer is off (scheduled emails, monitoring, background processing).
+**This is optional.** Many automation systems work perfectly fine running locally. Only add a server when you have workflows that need to run when your computer is off - scheduled emails, monitoring, background processing.
 
 **If you do set up a server, document it:**
 
@@ -849,9 +852,9 @@ How to push changes from local to server:
 [your deployment steps]
 ```
 
-## Syncing Across Devices
+## Syncing across devices
 
-If you work from multiple machines (laptop and desktop, or laptop and server):
+If you work from multiple machines:
 
 **Option 1: Git only**
 - Push from one machine, pull from the other
@@ -866,9 +869,9 @@ If you work from multiple machines (laptop and desktop, or laptop and server):
 **Option 3: Both**
 - Syncthing for real-time working files
 - Git for version history and backup
-- This is what the Oxide case study uses
+- This is what Oxide uses
 
-## Monitoring and Health Checks
+## Monitoring and health checks
 
 As your system grows, things can break silently. Add simple monitoring:
 
@@ -886,9 +889,9 @@ As your system grows, things can break silently. Add simple monitoring:
 - Have it verify your critical automations are still active
 - Send yourself a notification if something's down
 
-**The principle:** Build oversight into the system. If a process can fail silently, add a check. You'd rather get a "something broke" alert than discover it weeks later.
+**The principle:** Build oversight into the system. If a process can fail silently, add a check. You'd rather get a "something broke" alert than discover it three weeks later.
 
-## Scheduled Automation
+## Scheduled automation
 
 n8n is your primary tool for scheduling. Common patterns:
 
@@ -899,15 +902,13 @@ n8n is your primary tool for scheduling. Common patterns:
 | On trigger | New lead notification | n8n webhook -> CRM update -> notification |
 | Hourly | Health check | n8n cron -> check services -> alert if down |
 
-**Start with one scheduled workflow.** A daily task summary is a great first automation - it reinforces the system by surfacing your queue every morning.
+**Start with one scheduled workflow.** A daily task summary is a good first automation - it reinforces the system by surfacing your queue every morning.
 
 ---
 
 # Reference
 
-## Claude Code Keyboard Shortcuts
-
-A few useful ones to know:
+## Claude Code keyboard shortcuts
 
 | Shortcut | What It Does |
 |----------|-------------|
@@ -915,11 +916,11 @@ A few useful ones to know:
 | `Escape` | Cancel current generation |
 | `Ctrl+C` | Exit Claude Code |
 
-**Plan Mode:** When you need to plan before executing, you can ask Claude to enter plan mode. It will outline steps before taking action. Useful for complex multi-step tasks.
+**Plan Mode:** When you need to plan before executing, ask Claude to enter plan mode. It will outline steps before taking action - useful for complex multi-step tasks.
 
-## Useful CLAUDE.md Patterns
+## Useful CLAUDE.md patterns
 
-### Command Routing Table
+### Command routing table
 
 When your system has multiple domains, help Claude suggest the right one:
 
@@ -932,7 +933,7 @@ Invoices, tax, bookkeeping   -> /finances
 Server, Docker, deployment   -> /infrastructure
 ```
 
-### Output to Files
+### Output to files
 
 For long content, have Claude write to files instead of dumping text in the conversation:
 
@@ -941,7 +942,7 @@ For long content, have Claude write to files instead of dumping text in the conv
 Long content (>20 lines) -> save to ~/my-system/outputs/ with a dated filename.
 ```
 
-### Progress Tracking
+### Progress tracking
 
 For complex sessions:
 
@@ -952,29 +953,29 @@ If working on something complex, save progress to {DOMAIN}_PROGRESS.md
 as you go. Don't wait for a natural pause. Context can compress without warning.
 ```
 
-## Common n8n + Claude Code Patterns
+## Common n8n + Claude Code patterns
 
-### Pattern 1: Workflow Inspection
-```
+### Pattern 1: Workflow inspection
+```text
 You: "Show me what the daily report workflow does"
 Claude: [fetches workflow via n8n MCP, explains each node]
 ```
 
-### Pattern 2: Workflow Debugging
-```
+### Pattern 2: Workflow debugging
+```text
 You: "The client notification workflow failed last night"
 Claude: [checks execution history, reads error logs, identifies the broken node]
 ```
 
-### Pattern 3: New Workflow
-```
+### Pattern 3: New workflow
+```text
 You: "Build a workflow that checks my email every hour and
       adds new client inquiries to my CRM"
 Claude: [creates workflow with email trigger -> parser -> CRM API node]
 ```
 
-### Pattern 4: Workflow from Queue
-```
+### Pattern 4: Workflow from queue
+```text
 You: "/business" (loads queue showing "automate follow-up sequence")
 Claude: [reads task, builds n8n workflow, marks task complete in queue]
 ```
@@ -982,18 +983,22 @@ Claude: [reads task, builds n8n workflow, marks task complete in queue]
 ## Troubleshooting
 
 ### "Claude doesn't remember what we discussed yesterday"
-That's by design. Check your Handoff file - did you write one? If not, start doing that. The Handoff IS the memory.
+
+That's by design. Check your Handoff file - did you write one? If not, start doing that. The Handoff IS the memory. If this keeps happening, add "write the Handoff" explicitly to your session end protocol in CLAUDE.md so Claude can't close a session without doing it.
 
 ### "Claude is loading too much context"
+
 Check your slash command - is it reading files it doesn't need? Tighten the loading order. Only read what the current task requires.
 
 ### "My queue file is a mess"
+
 Time to split domains (Phase 4) or clean up:
 - Remove completed items (move to Log)
 - Group remaining tasks logically
 - Update the Quick Resume section
 
 ### "Claude keeps doing things I don't want"
+
 Add a rule to CLAUDE.md. Every correction is a future rule:
 ```markdown
 # Bad: hoping Claude remembers
@@ -1004,7 +1009,10 @@ Add a rule to CLAUDE.md. Every correction is a future rule:
 - Never modify config files without asking first.
 ```
 
+This is actually the best use of CLAUDE.md - it's a living record of what Claude needs to be told.
+
 ### "I don't know what to work on next"
+
 Create a `NEXT_ACTIONS.md` - a priority-ordered list across all domains. Max 10 items. This is your "what should I do?" file.
 
 ```markdown
@@ -1017,7 +1025,7 @@ Create a `NEXT_ACTIONS.md` - a priority-ordered list across all domains. Max 10 
 5. [ ] /marketing - Set up email automation
 ```
 
-## The Growth Path
+## The growth path
 
 Here's how this system typically evolves:
 
@@ -1031,9 +1039,9 @@ Month 6:  5+ domains + cross-domain communication
 Year 1:   Full system running your business and life
 ```
 
-You don't need to plan all of this. Just build what you need now, and expand when the current setup isn't enough. The architecture scales because each domain is independent - adding domain #5 doesn't make domains 1-4 more complex.
+You don't need to plan all of this. Build what you need now and expand when the current setup isn't enough. The architecture scales because each domain is independent - adding domain #5 doesn't make domains 1-4 more complex.
 
-**The most important thing:** Start using it. A system you use daily beats a perfect system you're still designing. Your CLAUDE.md will be messy. Your queue will have formatting you'll change later. That's fine. The system improves by being used.
+**The most important thing:** Start using it. A system you use daily beats a perfect system you're still designing. Your CLAUDE.md will be messy. Your queue will have formatting you'll change later. That's fine - the system improves by being used, not by being planned.
 
 ---
 
