@@ -1,0 +1,84 @@
+# [DOMAIN NAME] - Reference
+
+> This is the knowledge base for this domain. Claude reads it when it needs
+> deeper context - not every session. Keep the Queue lean; put stable background
+> knowledge here.
+>
+> Replace [DOMAIN NAME] with your domain (e.g., "Clients", "Finances", "Marketing").
+> Delete sections that don't apply. Add new sections as the domain grows.
+> If this file exceeds ~500 lines, extract the large sections into leaf files.
+
+---
+
+## Overview
+
+[What is this domain? What does it cover? Why does it exist?]
+
+[Example: "This domain covers all client relationships - from first contact through
+project delivery. It includes proposal templates, onboarding processes, pricing,
+and communication patterns."]
+
+---
+
+## Tools and Services
+
+| Tool | Purpose | Access / URL |
+|------|---------|-------------|
+| [Tool name] | [What you use it for] | [URL or "local"] |
+| [Tool name] | [What you use it for] | [URL or "local"] |
+
+---
+
+## Processes
+
+[Document your repeatable processes here. One subsection per process.]
+
+### [Process Name - e.g., Client Onboarding]
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+### [Process Name - e.g., Monthly Review]
+1. [Step 1]
+2. [Step 2]
+
+---
+
+## Rules and Constraints
+
+[Things Claude should always know when working in this domain.]
+
+- [Rule or constraint]
+- [Rule or constraint]
+
+Example:
+- Never send a proposal without a signed scope-of-work
+- All client communication goes through [platform], not personal email
+- Invoices are issued on the 1st of every month
+
+---
+
+## Key Contacts
+
+[Optional. People or organisations Claude might need to reference.]
+
+| Name / Entity | Role | Contact |
+|--------------|------|---------|
+| [Name] | [Role] | [email / platform handle] |
+
+---
+
+## Sub-Documents (Leaves)
+
+[When a section of this reference doc gets too big (~300 lines), extract it
+into its own file and link it here. That file becomes a "leaf" of this "trunk".]
+
+| File | Contents |
+|------|---------|
+| [DOMAIN]_[TOPIC].md | [What's in it] |
+
+---
+
+## Notes
+
+[Anything that doesn't fit the sections above but Claude should know.]

@@ -1,0 +1,51 @@
+# [DOMAIN NAME] - Queue and Active Work
+
+> Replace [DOMAIN NAME] with your domain (e.g., "Clients", "Finances", "Marketing").
+> This is the most important file in the domain. Claude reads it first every session.
+> Keep it current. This is your working memory.
+
+---
+
+## Quick Resume
+
+[2-3 sentences. What's the current state of this domain? What's actively in progress?
+What's the single most important next action? Update this every session.]
+
+Example:
+> Proposal sent to [client] on Monday, awaiting reply. Follow-up email template drafted
+> but not sent. Next: send follow-up if no reply by EOD Thursday.
+
+---
+
+## Queue
+
+### [Group 1 - e.g., Active Projects]
+- [ ] [Task description] - [any relevant context or deadline]
+- [ ] [Task description]
+- [x] [Completed task - leave checked items here until Recently Completed rotation]
+
+### [Group 2 - e.g., Waiting On]
+- [ ] [Task] - waiting on [person/thing] since [date]
+- [ ] [Task]
+
+### [Group 3 - e.g., Backlog]
+- [ ] [Low priority task]
+- [ ] [Low priority task]
+
+---
+
+## Recently Completed
+
+[Last 5 completed items. When this section has 5+ entries, move the oldest ones to
+the LOG file. This keeps the Queue focused on what's current.]
+
+- [YYYY-MM-DD]: [Brief description of what was done]
+- [YYYY-MM-DD]: [Brief description of what was done]
+
+---
+
+## Cross-Domain Notes
+
+[Notes from other domains that affect this one. Delete if not needed.]
+
+- [YYYY-MM-DD] From [other domain]: [what they found that's relevant here]
