@@ -1,0 +1,32 @@
+# [DOMAIN NAME] - Queue Backlog
+
+> **P1 items, future work, picked up during planning sessions. Loaded on-demand only.**
+> Load trigger: user says "what's on the backlog?" or "planning session."
+> This leaf cap: 300 lines. Prune when approaching limit.
+> Leaf naming convention: {DOMAIN}_QUEUE-BACKLOG.md (underscore-then-hyphen).
+
+---
+
+## P1 - High Priority (do next)
+
+- [ ] [Task] - [why it matters / deadline]
+- [ ] [Task]
+
+---
+
+## P2 - Do Soon
+
+- [ ] [Task]
+- [ ] [Task]
+
+---
+
+## Future / Nice to Have
+
+- [ ] [Task]
+- [ ] [Task]
+
+---
+
+<!-- Rotate to LOG when an item is done. Never let DONE items sit here. -->
+<!-- When this leaf approaches 300 lines, prune completed and deprioritised items. -->

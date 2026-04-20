@@ -1,149 +1,100 @@
-# Claude Code System
+# The Atlas Method
 
-I've been using Claude Code for about nine months to manage my whole life - business operations, finances, content creation, health tracking, psychology work, side projects, and a server running 24/7 in the background. Not with a shiny app. Just markdown files, slash commands, and a system I built from scratch because every other productivity tool I tried eventually failed me in the same way: it was shaped like someone else's brain.
-
-This repo documents how I built that system and how you can build yours.
-
-The short version: Claude Code sessions are stateless. Every time you start a new one, the AI starts fresh. So I stopped treating Claude Code like a conversation tool and started treating it like an engine that reads and writes files. The files are the memory. The system lives in them.
+A lean-by-design methodology for personal operating systems built on Claude Code.
 
 ---
 
-## What this is
+## The problem this solves
 
-A 5-phase curriculum for turning Claude Code into a persistent personal operating system - one that manages your business, projects, finances, or whatever else matters to you, across sessions, without losing context.
-
-It's not a framework you install. It's a pattern you build into your own files. By the end of it, you'll have:
-
-- A `CLAUDE.md` that acts as your system's operating manual (loaded automatically every session)
-- A domain structure where every area of work has its own queue, reference doc, and session history
-- Slash commands that load the right context in seconds, not minutes
-- (Optionally) connected tools, sub-agents, scheduled automations, and a server
-
-The system I run this on is called Oxide. It has 20+ domains and has been running daily for months. This repo is the distilled, generalisable version of what I learned building it.
+Claude Code personal OS systems grow silently. After 3-6 months, session init payloads cross 20-30% of the context window before a message is typed. Users don't notice until the system feels sluggish, and they don't know what to trim because the original template has no rotation guidance beyond "move to LOG when the list gets long." The Atlas Method adds domain types, trim triggers, trunk-and-leaf structure, and a self-audit command so your system stays fast by design - not by accident.
 
 ---
 
-## Who this is for
+## Principle Zero: Progressive loading
 
-You'll get the most out of this if you use Claude Code regularly and find yourself re-explaining context every session. Or if you manage several distinct areas of work (clients, finances, content, a side project) and want unified AI assistance across them. Or if you've ever thought "I wish Claude just already knew this."
+Session start loads a small core. Everything else loads only when its topic appears in conversation. This is the invariant that makes every other rule pay off. Without it, leaf splits and file family structures do nothing - because everything still loads at session start anyway.
 
-You need to be comfortable in a terminal and willing to maintain markdown files. That's the actual requirement - no specific background, no framework knowledge.
+**What loads at session start:**
+
+| File | Why |
+|------|-----|
+| `CLAUDE.md` (trunk only) | Core routing rules |
+| Active domain's `{DOMAIN}.md` (trunk) | Routing table + domain context |
+| Active domain's `{DOMAIN}_QUEUE.md` | Current active work |
+| Active domain's `{DOMAIN}_HANDOFF.md` | State from last session |
+
+That's the full session-start payload. Typically ~500 lines for a healthy domain. See "The numbers" below for per-file caps.
+
+**Naming convention = loading instructions:**
+
+- `_` underscore = structural, always loaded with the domain (`DEV_QUEUE.md`)
+- `-` hyphen = content leaf, loaded on-demand only (`DEV-AUTH.md`)
+
+Claude reads the naming and respects it. A well-named file set is a self-documenting load plan.
 
 ---
 
-## The 5 phases
+## Six domain types
 
-| Phase | What you build | When |
-|-------|---------------|------|
-| **1. Foundation** | CLAUDE.md, core rules, the file-as-memory shift | Day 1 |
-| **2. First Domain** | The 3-file system (Queue/Reference/Log), a slash command, handoffs | Week 1 |
-| **3. Tools and Connections** | MCP servers, n8n, sub-agents, hooks, memory | Week 2 |
-| **4. Multi-Domain** | Domain isolation, the forest architecture, cross-domain communication | Month 1 |
-| **5. Automation** | Git versioning, server setup, file syncing, monitoring, scheduling | Month 2+ |
+| Type | Rhythm | Rotation unit | Examples |
+|------|--------|---------------|----------|
+| `dev` | Project sprints, days to months | Per project | Codebases, client work, side projects |
+| `ops` | Monthly or quarterly | Per period | Tax, finances, health, invoicing |
+| `journaling` | Daily or weekly, continuous | Per calendar month | Diary, reflection, psychology |
+| `reference` | Low churn, updated rarely | Leaf split at 250 lines | Knowledge base, wiki, API docs |
+| `ephemeral` | One-off cluster, terminal | Archive whole domain on close | Research sprint, single event |
+| `companion` | Session-based, continuous | Per calendar month | Cyrus, Jung, Daedalus - multi-file startup |
 
-Each phase builds on the previous one. The concepts compound, so don't skip ahead.
+Declare the type at the top of every `{DOMAIN}.md`:
 
----
-
-## Quick start
-
-```bash
-# Clone the repo
-git clone https://github.com/DamianBuilds-ai/claude-code-system.git
-
-# Open setup.md - it's a slash command you paste into Claude Code
-# It audits what you already have and maps it to the 5 phases
-cat setup.md
-
-# Or from Claude Code in your project directory:
-# /setup
+```markdown
+> **Domain type:** dev
 ```
 
-The `/setup` command doesn't replace what you have. It reads your existing Claude Code setup, figures out where you are in the 5 phases, and recommends specific additions. It builds on what's already working.
+---
+
+## The numbers
+
+| File | Cap | Action when breached |
+|------|-----|----------------------|
+| `CLAUDE.md` | 250 lines | Split into `CLAUDE_*` family, loaded on-demand |
+| `{DOMAIN}.md` trunk | warn 250 / prune 280 / split 300 | Prune first; extract leaf only if pruning can't get under 280 |
+| `{DOMAIN}_QUEUE.md` trunk | 200 lines | Extract a QUEUE leaf (BACKLOG, ONHOLD, or project-scoped) |
+| `{DOMAIN}_QUEUE-*.md` leaves | 300 lines each | Prune or split further |
+| `{DOMAIN}_HANDOFF.md` | 200 lines (3 session blocks) | Prune oldest blocks |
+| `{DOMAIN}-{TOPIC}.md` content leaf | 200 lines | Prune first, then split |
+| Companion combined startup | 600 lines total | Trim lowest-churn file first |
+
+**Session-start payload at ceiling:** CLAUDE.md (250) + trunk (300) + QUEUE trunk (200) + HANDOFF (200) = ~950 lines worst case. Typical healthy system: ~500 lines.
 
 ---
 
-## What's in this repo
+## The /atlas command
 
-| File | What it is |
-|------|-----------|
-| `setup.md` | The coaching slash command - run this first |
-| `SYSTEM_GUIDE.md` | Full 5-phase curriculum with examples and troubleshooting |
-| `templates/CLAUDE.md.template` | Starting point for your system's operating manual |
-| `templates/DOMAIN_QUEUE.md.template` | Active task queue for any domain |
-| `templates/DOMAIN.md.template` | Reference/knowledge base for any domain |
-| `templates/DOMAIN_LOG.md.template` | Session history for any domain |
-| `templates/DOMAIN_HANDOFF.md.template` | Session relay baton for any domain |
-| `examples/example-domain-walkthrough.md` | Full worked example: building a Clients domain from scratch |
+Just type `/atlas`. It'll ask what to do next - and show you shortcuts as you learn.
 
----
+`/atlas` runs the audit - scans your files, flags violations, and ends with a short pro-tip about shortcuts, then: *"Found N violations. Walk through fixes? (yes / no / just top 3)"*
 
-## The core ideas (quick version)
+**Shortcuts** (surfaced in every audit output so you learn them by repetition):
 
-**Files are memory.** Claude Code sessions are stateless - close a session and the AI forgets everything. Your files don't. Build the system in files, use Claude as the engine that processes them.
+- `/atlas fix` - skip the audit summary, go straight into interactive fixing
+- `/atlas fix top-3` - target only the three biggest savings
 
-**The 3-file pattern.** Every domain (Clients, Finances, Marketing, whatever yours are) has three files: a Queue for active work, a Reference for knowledge, and a Log for history. A Handoff file bridges sessions.
-
-**The forest.** CLAUDE.md is the soil - always present, always loaded, behavioral rules for every session. Each domain is a tree: a trunk (reference doc), branches (queue, log, handoff), and leaves (specialised sub-docs when a topic outgrows the trunk). Trees stay small so no session wastes context loading irrelevant information.
-
-**Domain isolation.** When working on Clients, load only Clients files. When working on Finances, load only Finances files. This discipline keeps the system fast and the AI focused.
+The command never modifies files without your confirmation.
 
 ---
 
-## Contributing
+## Get started
 
-PRs welcome. If you've found patterns that work better than what's here, open one. If something in the guide is wrong or outdated, open an issue.
-
----
-
-## Credit and links
-
-Built by **DamianBuilds** - that's me. The system this is based on (Oxide) is private (it contains personal data), but I document what I learn building it publicly.
-
-- Portfolio: [portfolio.damianbuilds.com](https://portfolio.damianbuilds.com)
-- Building in public: [damianbuilds.com](https://damianbuilds.com)
-- LinkedIn: [linkedin.com/in/damian-yazbeck](https://linkedin.com/in/damian-yazbeck)
+1. Read `SYSTEM_GUIDE.md` - the full 5-phase curriculum
+2. Copy templates from `templates/` for your first domain
+3. Run `/atlas` monthly to keep init payload in check
+4. See `examples/` for worked examples of dev and companion domains
 
 ---
 
-## If you add code to this repo
+## Versioning
 
-This is currently a documentation-only repo. If you ever add runnable code (Python, Node, Docker, secrets), create a `.gitignore` at the root BEFORE that first commit:
+Current version: **v6.0** (2026-04-20)
 
-```text
-# Python
-__pycache__/
-*.pyc
-*.pyo
-venv/
-.venv/
-.pytest_cache/
-
-# Node
-node_modules/
-dist/
-*.log
-
-# Env & secrets (NEVER commit these)
-.env
-.env.*
-!.env.example
-credentials.json
-token.json
-*.key
-*.pem
-
-# OS & editor
-.DS_Store
-.vscode/
-.idea/
-*.swp
-```
-
-If you're adding code and there's no `.gitignore`, stop and create one first.
-
----
-
-## License
-
-MIT. See `LICENSE`.
+See `CHANGELOG.md` for full version history and what changed at each step.

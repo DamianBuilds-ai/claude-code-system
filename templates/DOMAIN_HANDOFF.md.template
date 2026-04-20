@@ -1,12 +1,8 @@
 # [DOMAIN NAME] - Handoff
 
-> The relay baton. Written at the end of every session. Read at the start of the next one.
->
-> Purpose: give the next session everything it needs to pick up immediately,
-> without relying on conversation history (which doesn't persist).
->
-> Each session's handoff goes under its own date header. Keep the last 3-5 sessions.
-> Older entries can be deleted - they're historical at that point and belong in the Log.
+> The relay baton. Written at end of every session. Read at start of the next one.
+> Cap: 200 lines. Keep the last 3 session blocks ONLY. Older blocks belong in LOG.
+> Replace [DOMAIN NAME] with your domain (e.g., "Clients", "Finances", "Dev").
 
 ---
 
@@ -15,7 +11,6 @@
 ### What Was Done
 - [Specific thing completed]
 - [Specific thing completed]
-- [Include enough detail that the next session doesn't need to re-investigate]
 
 ### In Progress
 - [Task that's started but not finished]
@@ -25,40 +20,40 @@
 ### Blocked
 - [Task that can't proceed]
   - Blocked by: [what's in the way]
-  - Waiting on: [person / decision / access / deadline]
+  - Waiting on: [person / decision / deadline]
 
 ### Context for Next Session
-- [Anything the next session should know that isn't obvious from the Queue or files]
+- [Anything the next session should know that isn't obvious from the Queue]
 - [Decisions made and why]
 - [Important file paths or IDs]
-- [Things to watch out for]
 
 ---
 
 <!--
-EXAMPLE HANDOFF:
+HARD RULE: Keep last 3 session blocks only.
+When adding a new block, delete the oldest if you already have 3.
+Older session history belongs in the LOG, not here.
+200-line cap enforced by /atlas.
+
+EXAMPLE:
 
 ## 2026-04-10 - Session Handoff
 
 ### What Was Done
 - Built automated follow-up sequence in n8n (workflow ID: abc123)
-- Tested with dummy client data - working correctly
 - Updated proposal template with new pricing structure
 
 ### In Progress
 - Welcome email template (50% done)
   - Current state: opening paragraph written, needs body and CTA
-  - Next action: complete body copy, then request design review from [person]
+  - Next action: complete body copy, then request design review
 
 ### Blocked
 - Lead tracking spreadsheet
   - Blocked by: need API access to [platform]
-  - Waiting on: [contact name] to approve access - emailed 2026-04-10
+  - Waiting on: [contact name] to approve - emailed 2026-04-10
 
 ### Context for Next Session
 - n8n follow-up workflow uses the Clients webhook trigger - don't modify that node
-- Email template draft saved at ~/my-system/drafts/welcome-v1.md
-- Client [name] mentioned interest in rush pricing - need a policy decision before
-  next proposal
 - Queue is current as of this handoff
 -->

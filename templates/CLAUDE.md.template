@@ -1,8 +1,11 @@
+<!-- Atlas Method v6.0 -->
 # CLAUDE.md - System Instructions
 
 > Replace all [bracketed placeholders] with your own content.
-> Delete sections that don't apply yet - you can add them as your system grows.
-> See SYSTEM_GUIDE.md for full context on each section.
+> Delete sections that don't apply yet - add them as your system grows.
+> Cap: 250 lines. When this file exceeds 250 lines, split overflow content into
+> CLAUDE_PROTOCOLS.md, CLAUDE_INFRASTRUCTURE.md, or CLAUDE_BUILDING.md - loaded
+> on-demand, not at session start. See SYSTEM_GUIDE.md for split guidance.
 
 ---
 
@@ -10,6 +13,59 @@
 
 [Your name]. I'm building a system to manage my [business / life / projects].
 I know [your background - e.g., intermediate Python, familiar with Docker].
+
+---
+
+## Domain Isolation (CRITICAL)
+
+**When working on a domain, read ONLY that domain's files. Never explore "just in case."**
+
+Every domain declares a type. The type drives rotation rhythm and file sizes.
+
+| Domain | Type | Read ONLY these files |
+|--------|------|-----------------------|
+| [domain-1-name] | [dev / ops / journaling / reference / ephemeral / companion] | [DOMAIN1]_QUEUE.md, [DOMAIN1].md |
+| [domain-2-name] | [type] | [DOMAIN2]_QUEUE.md, [DOMAIN2].md |
+| [domain-3-name] | [type] | [DOMAIN3]_QUEUE.md, [DOMAIN3].md |
+
+Cross-domain work: if the task spans multiple domains, read both. Not before.
+If unsure which domain: ASK. Don't explore multiple domains to figure it out.
+
+---
+
+## File Structure
+
+Every domain has up to 4 structural files (underscore = always loaded):
+- `{DOMAIN}_QUEUE.md` - Active work trunk (read FIRST every session, 200-line cap)
+- `{DOMAIN}.md` - Reference/knowledge trunk (read when needed, 300-line cap)
+- `{DOMAIN}_LOG.md` - History (rarely read unless looking back)
+- `{DOMAIN}_HANDOFF.md` - Session relay baton (200-line cap, 3 session blocks)
+
+Content leaves (hyphen = on-demand only):
+- `{DOMAIN}-{TOPIC}.md` - Loaded when user mentions that topic (200-line cap each)
+- `{DOMAIN}_QUEUE-BACKLOG.md`, `-ONHOLD.md`, `-{PROJECT}.md` - QUEUE overflow (300-line cap each)
+
+**QUEUE file first. Always.** It tells you what's active.
+**Never read LOG files** unless asked for historical context.
+
+---
+
+## Session Rules
+
+**Start of session:**
+1. Read the QUEUE file. Always.
+2. Read the HANDOFF file to see what happened last session.
+3. Report what's active and what's next.
+
+**During session:**
+- Update QUEUE after completing any task - don't wait until wrap-up
+- One task at a time - finish and check off before starting the next
+- Write decisions and findings to files immediately
+
+**End of session ("wrap up"):**
+1. Update QUEUE - check off completed items, update Quick Resume
+2. Write HANDOFF - what was done, in progress, blocked, context for next session
+3. Git commit if the repo is set up: `git add {files} && git commit -m '{domain}: session wrap-up'`
 
 ---
 
@@ -24,90 +80,13 @@ I know [your background - e.g., intermediate Python, familiar with Docker].
 
 ---
 
-## Domain Isolation
-
-**When working on a domain, read ONLY that domain's files. Never explore "just in case."**
-
-| If working on... | Read ONLY these files |
-|------------------|----------------------|
-| [domain-1-name] | [DOMAIN1]_QUEUE.md, [DOMAIN1].md |
-| [domain-2-name] | [DOMAIN2]_QUEUE.md, [DOMAIN2].md |
-| [domain-3-name] | [DOMAIN3]_QUEUE.md, [DOMAIN3].md |
-
-Cross-domain work: If the task spans multiple domains, read both. Not before.
-If unsure which domain: ASK. Don't explore multiple domains to figure it out.
-
----
-
-## File Structure
-
-Every domain has up to 4 files:
-- `{DOMAIN}_QUEUE.md` - Active work (read FIRST every session)
-- `{DOMAIN}.md` - Reference/knowledge base (read when needed)
-- `{DOMAIN}_LOG.md` - History (rarely read unless looking back)
-- `{DOMAIN}_HANDOFF.md` - Session relay baton (read at session start)
-
-**QUEUE file first. Always.** It tells you what's active.
-**Reference doc only when needed.** If the QUEUE gives enough context, skip it.
-**Never read LOG files** unless asked for historical context.
-
----
-
-## Session Rules
-
-**Start of session:**
-1. Read the QUEUE file. Always.
-2. Read the HANDOFF file to see what happened last session.
-3. Report what's active and what's next.
-
-**During session:**
-- Update QUEUE after completing any task (don't wait until wrap-up)
-- One task at a time - finish and check off before starting the next
-- Write decisions, corrections, and findings to files immediately
-
-**End of session ("wrap up"):**
-1. Update QUEUE - check off completed items, add new tasks, update Quick Resume
-2. Write HANDOFF - what was done, in progress, blocked, context for next session
-3. Git commit if the repo is set up: `git add {files} && git commit -m '{domain}: session wrap-up'`
-
----
-
-## Agent Delegation
-
-Delegate to sub-agents to keep main context clean. Every agent gets its own context window.
-
-- 3+ file reads -> prefer an agent
-- Quick lookups -> fast/cheap model (e.g., Haiku)
-- Research and analysis -> balanced model (e.g., Sonnet)
-- Complex reasoning -> full model (e.g., Opus), use sparingly
-- Always summarise agent results concisely. Don't parrot everything back.
-
----
-
-## n8n Rules
-
-[Delete this section if you don't use n8n]
-
-- Never delete workflows. Deactivate/archive instead. They contain logic and history.
-- Fetch workflow code fresh from the API. Don't store workflow JSON in markdown.
-- After building or modifying a workflow: "needs testing to confirm."
-- Always confirm scope before bulk API operations.
-
----
-
-## Output Rules
-
-Long content (>20 lines) -> save to `~/my-system/outputs/` with a dated filename.
-Don't dump large text blocks into the conversation.
-
----
-
 ## Command Routing
 
-If the topic is about...  -> Suggest using this slash command
+If the topic is about...  -> Suggest this slash command
 [domain-1 topic]          -> /[domain-1-command]
 [domain-2 topic]          -> /[domain-2-command]
 [domain-3 topic]          -> /[domain-3-command]
+System health, file sizes -> /atlas
 
 ---
 

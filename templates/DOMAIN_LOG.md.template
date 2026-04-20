@@ -1,12 +1,13 @@
 # [DOMAIN NAME] - Log
 
-> Historical record for this domain. Completed work rotates here from the Queue's
-> "Recently Completed" section when that section has 5+ entries.
+> Historical record. Completed work rotates here from Recently Completed (5+ items).
+> You rarely need to read this - it's an archive. Claude only reads it when you ask.
 >
-> You rarely need to read this file - it's an archive, not a working document.
-> Claude only reads this when you ask for historical context.
->
-> Format: group entries by date, newest first.
+> **Per-type rotation naming:**
+> - `dev`: `{DOMAIN}_LOG_{project-slug}.md` per project (e.g., `DEV_LOG_auth-refactor.md`)
+> - `ops`: `{DOMAIN}_LOG_YYYY-QN.md` per quarter (e.g., `FINANCES_LOG_2026-Q2.md`)
+> - `journaling`: `{DOMAIN}_LOG_YYYY-MM.md` per month (e.g., `CYRUS_LOG_2026-04.md`)
+> - `reference` / `ephemeral`: single LOG file is fine - low rotation volume
 
 ---
 
@@ -18,9 +19,6 @@
 - [What was done]
 - [What was decided]
 - [Any important context]
-
-**[Another topic if applicable]**
-- [What was done]
 
 ---
 
@@ -38,7 +36,7 @@ HOW ROTATION WORKS:
 
 When "Recently Completed" in the Queue has 5+ items:
 1. Move the OLDEST items to this Log (newest items stay in Queue)
-2. Add them under the appropriate date header here
+2. Add them under the appropriate date header
 3. If the date section doesn't exist yet, create it
 
 This keeps the Queue focused on what's current while preserving full history here.

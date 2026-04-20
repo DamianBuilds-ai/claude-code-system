@@ -1050,3 +1050,97 @@ You don't need to plan all of this. Build what you need now and expand when the 
 ---
 
 *Built with Claude Code. This guide is a living document - update it as Claude Code evolves and as you discover what works for your system.*
+
+---
+
+## Keeping the system lean over time
+
+### Principle Zero - the invariant
+
+Session start loads a small core. Everything else loads only when its topic appears in conversation. This one rule is what makes every size cap meaningful. If you load everything at startup regardless of topic, none of the file splits help.
+
+The session-start payload per domain is:
+- `CLAUDE.md` - system rules
+- `{DOMAIN}.md` trunk - domain reference
+- `{DOMAIN}_QUEUE.md` trunk - active work
+- `{DOMAIN}_HANDOFF.md` - last session state
+
+That's it. Leaves, QUEUE overflow, LOG files - none of these load unless explicitly triggered.
+
+### The numbers - and why
+
+| File | Cap | Why that number |
+|------|-----|-----------------|
+| `CLAUDE.md` | 250 lines | Global rules file. Every session reads it. Every extra line costs across all domains. |
+| `{DOMAIN}.md` trunk | warn 250 / prune 280 / split 300 | Reference doc. Always loaded. Dense enough to hold context routing without becoming a knowledge dump. |
+| `{DOMAIN}_QUEUE.md` trunk | 200 lines | Control surface, not a backlog. If your QUEUE exceeds 200 lines, you're storing work there that belongs in a leaf. |
+| `{DOMAIN}_QUEUE-*.md` leaves | 300 lines each | Loaded on-demand. Higher cap because they're not burning session-start budget. |
+| `{DOMAIN}_HANDOFF.md` | 200 lines (3 session blocks) | Relay baton. Needs enough context to orient the next session - not a full history. LOG holds history. |
+| `{DOMAIN}-{TOPIC}.md` content leaf | 200 lines | Loaded only on topic match. Should be a focused doc, not another dump. |
+| Companion combined startup | 600 lines total | Companion types (journaling, psychology, daily ops) load 3 structural files. Combined budget stops the multi-file cost from blowing session init. |
+
+**Healthy session-start payload:** ~500 lines total across all session-start files.
+**Ceiling at all caps hit:** ~950 lines. Still under most context window first-message budgets.
+
+### QUEUE-as-trunk pattern - worked example
+
+The QUEUE trunk is a control surface. It shows what's active and points to overflow leaves.
+
+```
+CLIENTS_QUEUE.md (active trunk, ~150 lines)
+  Quick Resume: "Proposal sent to Acme, awaiting reply. Next: follow up Thursday."
+  Active work:
+    - [ ] Follow up with Acme (Thursday)
+    - [ ] Finish onboarding doc for BetaCo
+  QUEUE leaves:
+    | Leaf | What lives there | Load when... |
+    |------|-----------------|--------------|
+    | CLIENTS_QUEUE-BACKLOG.md | 12 P1 leads to contact | Planning session |
+    | CLIENTS_QUEUE-acme.md | Full Acme project tasks | Working on Acme |
+  Recently Completed: (last 3 items)
+```
+
+The trunk stays clean. The leaves exist but cost nothing at session start. When you say "let's dig into Acme," the `/clients` command loads `CLIENTS_QUEUE-acme.md`. Otherwise it never loads.
+
+**When to extract a QUEUE leaf:**
+1. Active trunk exceeds 200 lines with a nameable section (e.g., "P1 backlog")
+2. Any single project has 30+ lines in the trunk
+3. Parked items accumulate beyond ~50 lines
+
+### Auto-rotation paths
+
+**Path 1 - Power users (agents available):**
+Agent auto-rotates DONE items from QUEUE to LOG at session wrap or when trunk exceeds 200. Reader identifies DONE sections, Builder moves them. No double-handling.
+
+**Path 2 - Methodology users (cost-sensitive):**
+Domain's session-open nudge appears when 2+ rules are breached: *"Your [domain] files are past their limits - worth running `/atlas` when you have a moment."* One nudge per session. `/atlas fix` handles the rotation interactively. Cost lives in one deliberate session per month.
+
+### /atlas walk-through
+
+1. Type `/atlas`
+2. Claude runs `wc -l` on your domain files and applies the size rules
+3. You get a list: *"3 violations found: CLIENTS_QUEUE.md is 230 lines (cap: 200), CLAUDE.md is 270 lines (cap: 250), CLIENTS_HANDOFF.md has 4 session blocks (cap: 3)"*
+4. Claude asks: *"Walk through fixes? (yes / no / just top 3)"*
+5. You pick. Claude proposes each fix, asks for confirmation, makes the edit.
+6. Files end up under their caps. Session-start payload shrinks.
+
+Run it monthly. It takes 5-10 minutes and keeps the system healthy without manual file audits.
+
+### Migration guidance for existing users
+
+If you have an existing system that predates Atlas v6:
+
+**Path A - Paste-and-run (recommended):** Open a fresh Claude Code session with your system. Type: *"Read this repo's SYSTEM_GUIDE.md and templates. Audit my current files against Atlas Method v6. Tell me what to change."* Claude reads the methodology, scans your files, and proposes a migration plan. Re-run every few months to stay aligned.
+
+**Path B - Manual (8 steps):**
+1. Declare a type at the top of every `{DOMAIN}.md`
+2. Check all structural file sizes against the caps table above
+3. Add a context routing table to any trunk that doesn't have one
+4. Restructure any QUEUE over 200 lines using the QUEUE-as-trunk pattern
+5. Prune HANDOFF files to last 3 session blocks only
+6. Add the QUEUE leaf footer comment to your QUEUE files (template in `templates/`)
+7. Run `/atlas` to verify
+8. Set a monthly calendar reminder to run `/atlas` again
+
+Most existing systems need steps 1, 4, and 5 first. The others are refinements.
+

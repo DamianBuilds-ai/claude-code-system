@@ -1,0 +1,32 @@
+# [DOMAIN NAME] - Queue On Hold
+
+> **Parked items, right-idea-wrong-time, do-not-pull-forward.**
+> Loaded only when reviewing parked work - not at session start.
+> Load trigger: user says "what's parked?" or "review on-hold items."
+> This leaf cap: 300 lines. Review and prune monthly.
+> Leaf naming convention: {DOMAIN}_QUEUE-ONHOLD.md (underscore-then-hyphen).
+
+---
+
+## On Hold - Waiting on External
+
+- [ ] [Task] - waiting on [person/decision/date] since [YYYY-MM-DD]
+- [ ] [Task] - waiting on [blocker]
+
+---
+
+## Parked - Right Idea, Wrong Time
+
+- [ ] [Task] - parked [YYYY-MM-DD] because [reason]
+- [ ] [Task]
+
+---
+
+## Won't Do (keeps the list honest)
+
+- [x] [Task] - closed [YYYY-MM-DD], reason: [why it's off the table]
+
+---
+
+<!-- Items here do NOT pull forward automatically. They only surface when this leaf loads. -->
+<!-- Monthly review: is the blocker gone? Promote to QUEUE trunk or drop permanently. -->

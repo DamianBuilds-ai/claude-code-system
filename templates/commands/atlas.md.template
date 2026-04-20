@@ -1,0 +1,73 @@
+# /atlas - Atlas Method self-audit
+
+Scans your domain files against Atlas Method v6 size rules and flags violations.
+Default behavior: audit, then ask what to fix.
+
+**Modes:**
+- `/atlas` - Run audit, end with interactive prompt
+- `/atlas fix` - Skip summary, go straight to interactive fixing
+- `/atlas fix top-3` - Work on only the 3 biggest savings
+
+**Rule:** Never modifies files without your confirmation.
+
+---
+
+## Audit implementation
+
+Run a single inventory command to collect all line counts:
+
+```bash
+wc -l *.md *_QUEUE*.md *_HANDOFF*.md *_LOG*.md *-*.md 2>/dev/null | sort -rn | head -40
+```
+
+Then apply these rules to flag violations:
+
+| Check | Rule | Flag as |
+|-------|------|---------|
+| CLAUDE.md | >250 lines | SPLIT - extract CLAUDE_* family |
+| {DOMAIN}.md trunk | >280 lines | PRUNE or SPLIT |
+| {DOMAIN}_QUEUE.md trunk | >200 lines | EXTRACT QUEUE leaf |
+| {DOMAIN}_HANDOFF.md | >200 lines | PRUNE oldest session blocks |
+| {DOMAIN}-{TOPIC}.md content leaf | >200 lines | PRUNE or SPLIT |
+| {DOMAIN}_QUEUE-*.md QUEUE leaf | >300 lines | PRUNE |
+| HANDOFF has >3 session blocks | count `## 20` headers | PRUNE oldest |
+| Recently Completed has 5+ items | count `- [` in that section | ROTATE to LOG |
+
+Report each violation clearly: file name, current line count, rule, suggested action.
+
+After listing all violations, always output these three lines in order:
+
+```
+Tip: next time, `/atlas fix` skips straight to interactive fixing.
+     `/atlas fix top-3` hits just the 3 biggest savings.
+
+Found [N] violation[s]. Walk through fixes? (yes / no / just top 3)
+```
+
+The tip stays always-visible for every `/atlas` run - newbies see it and learn, power users ignore it. Do not omit it even if the user has run `/atlas` before.
+
+Wait for the user's response before doing anything.
+
+---
+
+## Fix mode behavior
+
+When user picks "yes" or `/atlas fix` is used:
+1. Take violations in order of biggest savings (highest line count over cap first)
+2. For each: show the specific file, the violation, and the proposed fix
+3. Ask: "Fix this one? (yes / skip)"
+4. If yes: make the edit. Show a diff summary. Move to next.
+5. Never batch-fix without per-item confirmation.
+
+When user picks "just top 3" or `/atlas fix top-3` is used:
+- Same as above but stop after 3 fixes.
+
+---
+
+## What /atlas does NOT do
+
+- Does not auto-fix without confirmation
+- Does not delete content - moves it (QUEUE to leaf, HANDOFF to LOG, etc.)
+- Does not touch `archive/` directories
+- Does not read LOG files during audit (not part of session-start payload)
+- Does not judge pace, volume, or productivity - neutral state report only
