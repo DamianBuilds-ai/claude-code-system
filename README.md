@@ -95,6 +95,6 @@ The command never modifies files without your confirmation.
 
 ## Versioning
 
-Current version: **v6.0** (2026-04-20)
+Current version: **v6.1** (2026-04-21)
 
 See `CHANGELOG.md` for full version history and what changed at each step.

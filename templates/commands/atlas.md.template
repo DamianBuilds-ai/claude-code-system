@@ -64,6 +64,46 @@ When user picks "just top 3" or `/atlas fix top-3` is used:
 
 ---
 
+### v6.1 additions - token density + hook audit
+
+#### Token density check
+
+Line count is blind to prose density. A 121-line file can weigh 40K tokens if each line is commit-SHA-dense or paragraph-level. Add this to the audit:
+
+FOR each file in inventory:
+  bytes_per_line = bytes / lines
+  IF bytes_per_line > 400:
+    flag as DENSE
+    estimated_tokens = bytes / 4
+    IF estimated_tokens > 10000:
+      flag as HIGH TOKEN COST regardless of line count
+
+Report DENSE files explicitly in audit output with estimated token cost.
+
+#### Hook audit
+
+Scan the user's hook directories for session-start context leaks:
+
+Paths to check:
+- ~/.claude/hooks/
+- ~/oxide/hooks/  (if exists)
+- Any path declared in `~/.claude/settings.json` under hooks.SessionStart or hooks.UserPromptSubmit
+
+FOR each .sh or .py hook file:
+  IF hook fires on SessionStart OR UserPromptSubmit:
+    IF it contains `cat ` OR reads a file and outputs its content:
+      flag as POTENTIAL CONTEXT LEAK
+      show size of files it cats (wc -l each)
+      warn if any cat'd file > 50 lines
+
+Report leaky hooks explicitly in audit output. These are invisible to line-count caps because they inject before any file-level rules apply.
+
+#### Why v6.1 exists
+
+Stan's case. He paste-migrated Atlas v6.0 and his /atlas audit reported his system as lean (everything under caps). His actual session init was 30% of context because a session-start-context.sh hook was silently cat-ing a 121-line dense-prose file into every session (40K tokens before the first message). Line count alone missed it. v6.1 catches it.
+
+---
+
 ## What /atlas does NOT do
 
 - Does not auto-fix without confirmation

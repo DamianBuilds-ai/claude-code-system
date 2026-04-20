@@ -1,5 +1,21 @@
 # Changelog
 
+## v6.1 - 2026-04-21 - Token density + hook audit
+
+Two small additions to `/atlas` based on Stan's real-world adoption case:
+
+- **Token density check:** `/atlas` now computes bytes/line for every file. Files over ~400 bytes/line are flagged as DENSE regardless of line count. A 121-line file at 700 bytes/line weighs ~40K tokens - line count alone misses it.
+
+- **Hook audit:** `/atlas` now scans `~/.claude/hooks/` and any hook directory referenced in `settings.json`. Any SessionStart or UserPromptSubmit hook that `cat`s files into context is flagged as POTENTIAL CONTEXT LEAK, with size of cat'd files shown.
+
+### Why this version exists
+
+Stan paste-migrated Atlas v6.0 and the audit reported his system as lean. His actual init was 30% of context because a hook was silently cat-ing a dense-prose 121-line file (40K tokens) into every session. v6.1 catches that class of leak. Credit to his Opus for finding it.
+
+### Upgrade path
+
+Users on v6.0: paste the migration prompt again. It will read the new VERSION + CHANGELOG, apply the v6.1 delta (just re-running `/atlas` on the updated template), and stamp your CLAUDE.md.
+
 ## v6.0 - 2026-04-20 - Builder-friendly QUEUE model
 - QUEUE becomes a trunk (200 lines) with on-demand leaves (BACKLOG, ONHOLD, per-project)
 - Companion type added (6th domain type) with 600-line combined structural budget
